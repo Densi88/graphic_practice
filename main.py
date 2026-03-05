@@ -1,40 +1,51 @@
 import pygame
 from pygame import display, init, quit, event, mouse, draw
 
-
-
-
+##СДЕЛАТЬ ОТОБРАЖЕНИЕ РИСОВКИ
 
 init()
 
 display.set_caption("типа пеинт")
-screen=display.set_mode((876, 800))
+screen = display.set_mode((876, 800))
 
-draw_circle=False
-draw_triangle=False
-draw_rectangle=False
-drawing=False
-triangle_points=[]
-rectangle_points=[]
+# Состояния рисования
+draw_circle = False
+draw_triangle = False
+draw_rectangle = False
+drawing = False
+drawing_line = False
+click = False
+triangle_points = []
+rectangle_points = []
+line_points = []
 
-running =True
-first_pos=None
-WHITE=(255,255,255)
-BLACK=(0, 0, 0)
-GRAY = (200, 200, 200) 
+running = True
+first_pos = None
+
+# ЦВЕТА
+WHITE = (255, 255, 255)
+BLACK = (0, 0, 0)
+GRAY = (200, 200, 200)
 BLUE = (100, 150, 255)
-color=BLACK
+SELECTED = (255, 0, 0) 
+
+color = BLACK
 screen.fill(WHITE)
-button_circle=pygame.Surface((120, 40))
-color_change_surface=pygame.Surface((75, 1000))
-button_rectangle=pygame.Surface((120, 40))
-button_triangle=pygame.Surface((120, 40))
-black_color=pygame.Surface((60, 20))
-blue_color=pygame.Surface((60, 20))
-save_button=pygame.Surface((60, 20))
-main_surface=pygame.Surface((800, 55))
-clear_button_surface=pygame.Surface((60, 20))
-brush_button_surface=pygame.Surface((60, 20))
+
+# ПОВЕРХНОСТИ КНОПОЧЕК И РАБОЧИХ ОБЛАСТЕЙ
+line_button = pygame.Surface((60, 20))
+button_circle = pygame.Surface((120, 40))
+color_change_surface = pygame.Surface((75, 1000))
+button_rectangle = pygame.Surface((120, 40))
+button_triangle = pygame.Surface((120, 40))
+black_color = pygame.Surface((60, 20))
+blue_color = pygame.Surface((60, 20))
+save_button = pygame.Surface((60, 20))
+main_surface = pygame.Surface((800, 80))
+clear_button_surface = pygame.Surface((60, 20))
+brush_button_surface = pygame.Surface((60, 20))
+
+# Заполнение цветом
 brush_button_surface.fill(GRAY)
 clear_button_surface.fill(GRAY)
 black_color.fill(BLACK)
@@ -45,69 +56,105 @@ save_button.fill(GRAY)
 button_triangle.fill(GRAY)
 button_circle.fill(GRAY)
 button_rectangle.fill(GRAY)
-font=pygame.font.Font(None, 14)
+line_button.fill(GRAY)
 
+font = pygame.font.Font(None, 14)
+
+# ТЕКСТЫ С КНОПОК
 text = font.render("Circle", True, BLACK)
-text_button = text.get_rect(
-    center=(button_circle.get_width() /2, 
-            button_circle.get_height()/2))
+text_button = text.get_rect(center=(button_circle.get_width()/2, button_circle.get_height()/2))
 text2 = font.render("Rectangle", True, BLACK)
-text_button2 = text2.get_rect(
-    center=(button_circle.get_width() /2, 
-            button_circle.get_height()/2))
+text_button2 = text2.get_rect(center=(button_rectangle.get_width()/2, button_rectangle.get_height()/2))
 text3 = font.render("Triangle", True, BLACK)
-text_button3 = text3.get_rect(
-    center=(button_triangle.get_width() /2, 
-            button_triangle.get_height()/2))
-text4=font.render("Save", True, BLACK)
-text_button4 = text4.get_rect(
-    center=(save_button.get_width() /2, 
-            save_button.get_height()/2))
-text5=font.render("Clear", True, BLACK)
-text_button5 = text5.get_rect(
-    center=(clear_button_surface.get_width() /2, 
-            clear_button_surface.get_height()/2))
-
+text_button3 = text3.get_rect(center=(button_triangle.get_width()/2, button_triangle.get_height()/2))
+text4 = font.render("Save", True, BLACK)
+text_button4 = text4.get_rect(center=(save_button.get_width()/2, save_button.get_height()/2))
+text5 = font.render("Clear", True, BLACK)
+text_button5 = text5.get_rect(center=(clear_button_surface.get_width()/2, clear_button_surface.get_height()/2))
 text6 = font.render("Brush", True, BLACK)
-text_button6 = text.get_rect(
-    center=(brush_button_surface.get_width() /2, 
-            brush_button_surface.get_height()/2))
+text_button6 = text6.get_rect(center=(brush_button_surface.get_width()/2, brush_button_surface.get_height()/2))
+text7 = font.render("Line", True, BLACK)
+text_button7 = text7.get_rect(center=(line_button.get_width()/2, line_button.get_height()/2))
 
+# РАСПОЛОЖЕНИЕ КНОПОК НА ЭКРАНЕ
+main_surface_rect = pygame.Rect(1, 1, 150, 50)
+color_change_surface_rect = pygame.Rect(801, 1, 150, 50)
+button_rect = pygame.Rect(670, 10, 150, 50)      # circle
+button_rect2 = pygame.Rect(520, 10, 150, 50)     # rectangle
+button_rect3 = pygame.Rect(370, 10, 150, 50)     # Triangle
+button_rect4 = pygame.Rect(20, 10, 100, 50)      # save
+button_rect5 = pygame.Rect(130, 10, 100, 50)     # clear
+button_rect6 = pygame.Rect(240, 10, 100, 50)     # brush
+button_rect7 = pygame.Rect(805, 21, 60, 20)      # black color
+button_rect8 = pygame.Rect(805, 42, 60, 20)      # blue color
+button_rect9 = pygame.Rect(20, 55, 60, 20)       # line
 
-main_surface_rect=pygame.Rect(1, 1, 150, 50) 
-color_change_surface_rect=pygame.Rect(801, 1, 150, 50)
-button_rect = pygame.Rect(670, 10, 150, 50) #circle
-button_rect2 = pygame.Rect(520, 10, 150, 50) #rectangle
-button_rect3 = pygame.Rect(370, 10, 150, 50) #Triangle
-button_rect4 = pygame.Rect(20, 10, 100, 50) #save
-button_rect5 = pygame.Rect(130, 10, 100, 50) #clear   
-button_rect6 = pygame.Rect(240, 10, 100, 50)  #brush
-button_rect7=pygame.Rect(805, 21, 60, 20) # black color
-button_rect8=pygame.Rect(805, 42, 60, 20) # blue color
+# Словарь для хранения состояния выбранной кнопки
+selected_button = None  # None, "circle", "rectangle", "triangle", "brush", "line"
 
+# Функция для обновления обводки всех кнопок
+def draw_buttons():
+    # Перерисовываем все кнопки с обводкой
+    # Сначала заполняем базовым цветом
+    button_circle.fill(GRAY)
+    button_rectangle.fill(GRAY)
+    button_triangle.fill(GRAY)
+    brush_button_surface.fill(GRAY)
+    line_button.fill(GRAY)
+    # save и clear не перекрашиваем, они всегда серые
+    
+    # Добавляем текст
+    button_circle.blit(text, text_button)
+    button_rectangle.blit(text2, text_button2)
+    button_triangle.blit(text3, text_button3)
+    brush_button_surface.blit(text6, text_button6)
+    line_button.blit(text7, text_button7)
+    save_button.blit(text4, text_button4)
+    clear_button_surface.blit(text5, text_button5)
+    
+    # Отрисовка рамок (обычная черная)
+    pygame.draw.rect(button_circle, BLACK, button_circle.get_rect(), 2)
+    pygame.draw.rect(button_rectangle, BLACK, button_rectangle.get_rect(), 2)
+    pygame.draw.rect(button_triangle, BLACK, button_triangle.get_rect(), 2)
+    pygame.draw.rect(brush_button_surface, BLACK, brush_button_surface.get_rect(), 2)
+    pygame.draw.rect(line_button, BLACK, line_button.get_rect(), 2)
+    pygame.draw.rect(save_button, BLACK, save_button.get_rect(), 2)
+    pygame.draw.rect(clear_button_surface, BLACK, clear_button_surface.get_rect(), 2)
+    
+    # Если есть выбранная кнопка, рисуем поверх красную обводку (потолще)
+    if selected_button == "circle":
+        pygame.draw.rect(button_circle, SELECTED, button_circle.get_rect(), 4)
+    elif selected_button == "rectangle":
+        pygame.draw.rect(button_rectangle, SELECTED, button_rectangle.get_rect(), 4)
+    elif selected_button == "triangle":
+        pygame.draw.rect(button_triangle, SELECTED, button_triangle.get_rect(), 4)
+    elif selected_button == "brush":
+        pygame.draw.rect(brush_button_surface, SELECTED, brush_button_surface.get_rect(), 4)
+    elif selected_button == "line":
+        pygame.draw.rect(line_button, SELECTED, line_button.get_rect(), 4)
 
+# Функция для обновления экрана с кнопками
+def update_screen_buttons():
+    screen.blit(button_circle, (button_rect.x, button_rect.y))
+    screen.blit(button_rectangle, (button_rect2.x, button_rect2.y))
+    screen.blit(button_triangle, (button_rect3.x, button_rect3.y))
+    screen.blit(brush_button_surface, (button_rect6.x, button_rect6.y))
+    screen.blit(line_button, (button_rect9.x, button_rect9.y))
+    # save и clear не меняются, но тоже обновляем для порядка
+    screen.blit(save_button, (button_rect4.x, button_rect4.y))
+    screen.blit(clear_button_surface, (button_rect5.x, button_rect5.y))
+    pygame.display.update()
 
-
-
-
-button_circle.blit(text, text_button)
-button_rectangle.blit(text2, text_button2)
-button_triangle.blit(text3, text_button3)
-save_button.blit(text4, text_button4)
-clear_button_surface.blit(text5, text_button5)
-brush_button_surface.blit(text6, text_button6)
-
+# Отрисовка рамок для остальных поверхностей (не кнопок выбора)
 pygame.draw.rect(color_change_surface, BLACK, color_change_surface.get_rect(), 2)
 pygame.draw.rect(main_surface, BLACK, main_surface.get_rect(), 2)
-pygame.draw.rect(button_circle, BLACK, button_circle.get_rect(), 2)
-pygame.draw.rect(button_rectangle, BLACK, button_rectangle.get_rect(), 2)
-pygame.draw.rect(button_triangle, BLACK, button_triangle.get_rect(), 2)
-pygame.draw.rect(save_button, BLACK, save_button.get_rect(), 2)
-pygame.draw.rect(clear_button_surface, BLACK, clear_button_surface.get_rect(), 2)
-pygame.draw.rect(brush_button_surface, BLACK, brush_button_surface.get_rect(), 2)
 pygame.draw.rect(black_color, BLACK, black_color.get_rect(), 2)
 pygame.draw.rect(blue_color, BLACK, blue_color.get_rect(), 2)
 
+# Начальная отрисовка кнопок
+draw_buttons()
+
+# ОТРИСОВКА САМИХ КНОПОК НА ЭКРАНЕ (первоначальная)
 screen.blit(color_change_surface, (color_change_surface_rect.x, color_change_surface_rect.y))
 screen.blit(main_surface, (main_surface_rect.x, main_surface_rect.y))
 screen.blit(button_circle, (button_rect.x, button_rect.y))
@@ -118,80 +165,139 @@ screen.blit(clear_button_surface, (button_rect5.x, button_rect5.y))
 screen.blit(brush_button_surface, (button_rect6.x, button_rect6.y))
 screen.blit(black_color, (button_rect7.x, button_rect7.y))
 screen.blit(blue_color, (button_rect8.x, button_rect8.y))
+screen.blit(line_button, (button_rect9.x, button_rect9.y))
 
 pygame.display.update()
+
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
+            
         if event.type == pygame.MOUSEBUTTONDOWN:
+            # Обработка нажатия на кнопки инструментов
             if button_rect.collidepoint(event.pos):
                 draw_circle = True
                 draw_rectangle = False
                 draw_triangle = False
+                drawing = False
+                drawing_line = False
+                selected_button = "circle"
+                draw_buttons()
+                update_screen_buttons()  # Обновляем экран с новыми кнопками
+                print("Выбран круг")
+                
             elif button_rect2.collidepoint(event.pos):
                 draw_circle = False
                 draw_rectangle = True
                 draw_triangle = False
+                drawing = False
+                drawing_line = False
+                selected_button = "rectangle"
+                draw_buttons()
+                update_screen_buttons()
+                print("Выбран прямоугольник")
+                
             elif button_rect3.collidepoint(event.pos):
                 draw_circle = False
                 draw_rectangle = False
                 draw_triangle = True
+                drawing = False
+                drawing_line = False
+                selected_button = "triangle"
+                draw_buttons()
+                update_screen_buttons()
+                print("Выбран треугольник")
+                
+            elif button_rect6.collidepoint(event.pos):
+                drawing = True
+                draw_circle = False
+                draw_triangle = False
+                draw_rectangle = False
+                drawing_line = False
+                selected_button = "brush"
+                draw_buttons()
+                update_screen_buttons()
+                print("Выбрана кисть")
+                
+            elif button_rect9.collidepoint(event.pos):
+                drawing = False
+                draw_circle = False
+                draw_rectangle = False
+                draw_triangle = False
+                drawing_line = True
+                selected_button = "line"
+                draw_buttons()
+                update_screen_buttons()
+                print("Выбрана линия")
+                
             elif button_rect4.collidepoint(event.pos):
                 drawing_area = screen.subsurface((0, 60, 800, 740))
-                filename ="drawing.png"
+                filename = "drawing.png"
                 pygame.image.save(drawing_area, filename)
+                print("Сохранено")
+                
             elif button_rect5.collidepoint(event.pos):
                 screen.fill(WHITE)
+                # Перерисовываем весь интерфейс заново
                 screen.blit(color_change_surface, (color_change_surface_rect.x, color_change_surface_rect.y))
                 screen.blit(main_surface, (main_surface_rect.x, main_surface_rect.y))
-                screen.blit(button_circle, (button_rect.x, button_rect.y))
-                screen.blit(button_rectangle, (button_rect2.x, button_rect2.y))
-                screen.blit(button_triangle, (button_rect3.x, button_rect3.y))
-                screen.blit(save_button, (button_rect4.x, button_rect4.y))
-                screen.blit(clear_button_surface, (button_rect5.x, button_rect5.y))
-                screen.blit(brush_button_surface, (button_rect6.x, button_rect6.y))
                 screen.blit(black_color, (button_rect7.x, button_rect7.y))
                 screen.blit(blue_color, (button_rect8.x, button_rect8.y))
-                pygame.display.update()
+                # Кнопки инструментов рисуем через нашу функцию
+                draw_buttons()
+                update_screen_buttons()
                 print("Экран очищен")
-            elif button_rect6.collidepoint(event.pos):
-                drawing=True
-                draw_circle=False
-                draw_triangle=False
-                draw_rectangle=False
+                
             elif button_rect7.collidepoint(event.pos):
-                print("Сменили цвет")
-                color=BLACK
+                color = BLACK
+                print("Сменили цвет на черный")
+                
             elif button_rect8.collidepoint(event.pos):
-                print("Сменили цвет")
-                color=BLUE
+                color = BLUE
+                print("Сменили цвет на синий")
         
-        # Обработка рисовки
-        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:  # Левая кнопка мыши
+        # Обработка рисования
+        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+            # Проверяем, что нажатие не на кнопках интерфейса
             if not (button_rect.collidepoint(event.pos) or 
                     button_rect2.collidepoint(event.pos) or 
                     button_rect3.collidepoint(event.pos) or
                     button_rect4.collidepoint(event.pos) or
-                    button_rect5.collidepoint(event.pos)):
+                    button_rect5.collidepoint(event.pos) or
+                    button_rect6.collidepoint(event.pos) or
+                    button_rect9.collidepoint(event.pos) or
+                    button_rect7.collidepoint(event.pos) or
+                    button_rect8.collidepoint(event.pos)):
                 
                 first_pos = event.pos
                 drawing = True
+                
                 if draw_circle:
                     center = event.pos
                     pygame.draw.circle(screen, color, center, 50, 5)
                     pygame.display.update()
                     print("Нарисовали круг!")
-                    drawing = False       
+                    drawing = False
+                    
                 if draw_triangle:
                     triangle_points.append(event.pos)
                     if len(triangle_points) == 3:
                         pygame.draw.polygon(screen, color, triangle_points, 5)
                         pygame.display.update()
-                        triangle_points = [] 
+                        triangle_points = []
+                        
+                if drawing_line:
+                    line_points.append(event.pos)
+                    if len(line_points) == 2:
+                        pygame.draw.line(screen, color=color, start_pos=line_points[0], end_pos=line_points[1], width=5)
+                        print("нарисовали линию")
+                        line_points = []
+                        pygame.display.update()
+                        
                 if draw_rectangle:
                     rectangle_points.append(event.pos)
-                    if len(rectangle_points)==2:
+                    if len(rectangle_points) == 2:
                         x1, y1 = rectangle_points[0]
                         x2, y2 = rectangle_points[1]
                         rect_x = min(x1, x2)
@@ -200,16 +306,14 @@ while running:
                         rect_height = abs(y2 - y1)
                         pygame.draw.rect(screen, color, (rect_x, rect_y, rect_width, rect_height), 5)
                         pygame.display.update()
-                        rectangle_points = [] 
-
-                    
-        if event.type == pygame.MOUSEMOTION and drawing and not draw_circle and not draw_rectangle and not draw_triangle:
+                        rectangle_points = []
+        
+        if event.type == pygame.MOUSEMOTION and drawing and not draw_circle and not draw_rectangle and not draw_triangle and not drawing_line:
             if first_pos:
                 current_pos = event.pos
                 pygame.draw.line(screen, color, first_pos, current_pos, 10)
                 first_pos = current_pos
                 pygame.display.update()
-        
         
         if event.type == pygame.MOUSEBUTTONUP:
             print("Прекращаем рисовать")
@@ -217,5 +321,3 @@ while running:
             drawing = False
 
 pygame.quit()
-
-
